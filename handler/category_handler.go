@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 	"user-management/model"
 	"user-management/service"
 )
@@ -28,7 +29,31 @@ func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
+	// Validate MasterUiRequest fields (provided at top-level via embedding)
+	if req.TenantId == "" || req.UserId == "" {
+		json.NewEncoder(w).Encode(
+			model.MasterUiResponse{
+				Status:  false,
+				Content: "TenantId and UserId are required",
+				Message: model.Failed,
+			},
+		)
+		return
+	}
 
+	// Merge master fields into category, but don't overwrite provided values.
+	// if req.Category.TenantID == "" {
+	// 	req.Category.TenantID = req.TenantId
+	// }
+	if req.Category.CreatedBy == "" {
+		req.Category.CreatedBy = req.UserId
+	}
+	if req.Category.CreatedDate.IsZero() {
+		req.Category.CreatedDate = time.Now()
+	}
+	if req.Category.ModifiedDate.IsZero() {
+		req.Category.ModifiedDate = time.Now()
+	}
 	resp, err := h.service.SaveCategory(req.Category)
 	if err != nil {
 		json.NewEncoder(w).Encode(

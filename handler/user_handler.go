@@ -62,36 +62,36 @@ func (h *UserHandler) GetUserByName(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *UserHandler) SaveNewUser(w http.ResponseWriter, r *http.Request) {
-	var req model.MasterUiRequest
+// func (h *UserHandler) SaveNewUser(w http.ResponseWriter, r *http.Request) {
+// 	var req model.MasterUiRequest
 
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		json.NewEncoder(w).Encode(
-			model.MasterUiResponse{
-				Status:  false,
-				Content: err.Error(),
-				Message: model.Failed,
-			},
-		)
-	}
+// 	err := json.NewDecoder(r.Body).Decode(&req)
+// 	if err != nil {
+// 		json.NewEncoder(w).Encode(
+// 			model.MasterUiResponse{
+// 				Status:  false,
+// 				Content: err.Error(),
+// 				Message: model.Failed,
+// 			},
+// 		)
+// 	}
 
-	resp, err := h.service.SaveUser(req.User)
-	if err != nil {
-		json.NewEncoder(w).Encode(
-			model.MasterUiResponse{
-				Status:  false,
-				Content: err.Error(),
-				Message: model.Failed,
-			},
-		)
-	}
+// 	resp, err := h.service.SaveUser(req.User)
+// 	if err != nil {
+// 		json.NewEncoder(w).Encode(
+// 			model.MasterUiResponse{
+// 				Status:  false,
+// 				Content: err.Error(),
+// 				Message: model.Failed,
+// 			},
+// 		)
+// 	}
 
-	json.NewEncoder(w).Encode(
-		model.MasterUiResponse{
-			Status:  true,
-			Content: resp,
-			Message: model.Success,
-		},
-	)
-}
+// 	json.NewEncoder(w).Encode(
+// 		model.MasterUiResponse{
+// 			Status:  true,
+// 			Content: resp,
+// 			Message: model.Success,
+// 		},
+// 	)
+// }

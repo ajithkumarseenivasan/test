@@ -11,12 +11,7 @@ type Category struct {
 	Name         string             `bson:"name" json:"name"`
 	Description  string             `bson:"description" json:"description"`
 	Code         string             `bson:"code" json:"code"`
-	TenantID     string             `bson:"tenantId" json:"tenantId"`
 	CreatedDate  time.Time          `bson:"createdDate" json:"createdDate"`
 	ModifiedDate time.Time          `bson:"modifiedDate" json:"modifiedDate"`
 	CreatedBy    string             `bson:"createdBy" json:"createdBy"`
-}
-
-type CategoryRequest struct {
-	Category Category `json:"category"`
 }
