@@ -20,7 +20,7 @@ type Application struct {
 func NewApplication() *Application {
 	mongoUri := os.Getenv("MONGO_URI")
 	if mongoUri == "" {
-		mongoUri = "mongodb+srv://ajith:YgnkuVHWKIiKu1t2@cluster0.f8nv8.mongodb.net/linga?retryWrites=true&w=majority"
+		mongoUri = "mongodb+srv://ajith:YgnkuVHWKIiKu1t2@cluster0.f8nv8.mongodb.net/stratos?retryWrites=true&w=majority"
 	}
 
 	client, err := database.NewMongoConnection(mongoUri)

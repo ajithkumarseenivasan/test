@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"time"
+	"strconv"
 	"user-management/model"
 	"user-management/service"
 )
@@ -40,21 +40,7 @@ func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-
-	// Merge master fields into category, but don't overwrite provided values.
-	// if req.Category.TenantID == "" {
-	// 	req.Category.TenantID = req.TenantId
-	// }
-	if req.Category.CreatedBy == "" {
-		req.Category.CreatedBy = req.UserId
-	}
-	if req.Category.CreatedDate.IsZero() {
-		req.Category.CreatedDate = time.Now()
-	}
-	if req.Category.ModifiedDate.IsZero() {
-		req.Category.ModifiedDate = time.Now()
-	}
-	resp, err := h.service.SaveCategory(req.Category)
+	resp, err := h.service.SaveCategory(req)
 	if err != nil {
 		json.NewEncoder(w).Encode(
 			model.MasterUiResponse{
@@ -70,6 +56,44 @@ func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 		model.MasterUiResponse{
 			Status:  true,
 			Content: resp,
+			Message: model.Success,
+		},
+	)
+}
+
+func (h *CategoryHandler) GetCategories(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	page, err := strconv.ParseInt(query.Get("page"), 10, 64)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err := strconv.ParseInt(query.Get("limit"), 10, 64)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+	tenantId := query.Get("tenantId")
+
+	categories, total, err := h.service.GetCategories(tenantId, page, limit)
+	if err != nil {
+		json.NewEncoder(w).Encode(
+			model.MasterUiResponse{
+				Status:  false,
+				Content: err.Error(),
+				Message: model.Failed,
+			},
+		)
+		return
+	}
+
+	json.NewEncoder(w).Encode(
+		model.MasterUiResponse{
+			Status: true,
+			Content: model.CategoryListResponse{
+				Categories: categories,
+				Page:       page,
+				Limit:      limit,
+				Total:      total,
+			},
 			Message: model.Success,
 		},
 	)

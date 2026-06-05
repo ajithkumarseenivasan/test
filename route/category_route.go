@@ -7,5 +7,6 @@ import (
 )
 
 func RegisterCategoryRoutes(r *mux.Router, categoryHandler *handler.CategoryHandler) {
-	r.HandleFunc("/category/save", categoryHandler.SaveCategory).Methods("POST")
+	r.HandleFunc("/inventory/category/save", categoryHandler.SaveCategory).Methods("POST")
+	r.HandleFunc("/inventory/getCategory", categoryHandler.GetCategories).Methods("GET")
 }
