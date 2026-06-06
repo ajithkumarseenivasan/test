@@ -14,6 +14,8 @@ import (
 type UserRepository interface {
 	GetAll() ([]model.User, error)
 	GetUserByName(userName string) (model.User, error)
+	GetUserByEmail(email string) (model.User, error)
+	GetUserByID(id string) (model.User, error)
 	SaveNewUser(user model.User) (bool, error)
 }
 
@@ -22,7 +24,7 @@ type userRepository struct {
 }
 
 func NewUserRepository(client *mongo.Client) UserRepository {
-	collection := client.Database("linga").Collection("users")
+	collection := client.Database("stratos").Collection("users")
 	return &userRepository{
 		userCollection: collection,
 	}
@@ -66,6 +68,50 @@ func (u *userRepository) GetUserByName(userName string) (model.User, error) {
 
 	filter := bson.M{"name": userName}
 	err := u.userCollection.FindOne(ctx, filter).Decode(&resultUser)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return resultUser, errors.New("user not found")
+		}
+		return resultUser, err
+	}
+
+	return resultUser, nil
+}
+
+func (u *userRepository) GetUserByEmail(email string) (model.User, error) {
+	var resultUser model.User
+	if email == "" {
+		return resultUser, errors.New("email can not be empty")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.M{"email": email}
+	err := u.userCollection.FindOne(ctx, filter).Decode(&resultUser)
+	if err != nil {
+		return resultUser, err
+	}
+
+	return resultUser, nil
+}
+
+func (u *userRepository) GetUserByID(id string) (model.User, error) {
+	var resultUser model.User
+	if id == "" {
+		return resultUser, errors.New("user id can not be empty")
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return resultUser, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": objectID}
+	err = u.userCollection.FindOne(ctx, filter).Decode(&resultUser)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return resultUser, errors.New("user not found")

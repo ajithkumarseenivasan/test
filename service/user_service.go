@@ -8,6 +8,7 @@ import (
 type UserService interface {
 	GetUsers() ([]model.User, error)
 	GetUserByName(userName string) (model.User, error)
+	GetUserByID(id string) (model.User, error)
 	SaveUser(user model.User) (bool, error)
 }
 
@@ -25,6 +26,10 @@ func (u *userService) GetUsers() ([]model.User, error) {
 
 func (u *userService) GetUserByName(userName string) (model.User, error) {
 	return u.repo.GetUserByName(userName)
+}
+
+func (u *userService) GetUserByID(id string) (model.User, error) {
+	return u.repo.GetUserByID(id)
 }
 
 func (u *userService) SaveUser(user model.User) (bool, error) {

@@ -14,10 +14,12 @@ import (
 type Application struct {
 	UserHandler     *handler.UserHandler
 	CategoryHandler *handler.CategoryHandler
+	AuthHandler     *handler.AuthHandler
+	UserService     service.UserService
 	mongoClient     *mongo.Client
 }
 
-func NewApplication() *Application {
+func NewApplication(jwtSecret string) *Application {
 	mongoUri := os.Getenv("MONGO_URI")
 	if mongoUri == "" {
 		mongoUri = "mongodb+srv://ajith:YgnkuVHWKIiKu1t2@cluster0.f8nv8.mongodb.net/stratos?retryWrites=true&w=majority"
@@ -32,6 +34,9 @@ func NewApplication() *Application {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 
+	authService := service.NewAuthService(userRepo, jwtSecret)
+	authHandler := handler.NewAuthHandler(authService)
+
 	categoryRepo := repository.NewCategoryRepository(client)
 	categoryService := service.NewCategoryService(categoryRepo)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
@@ -39,6 +44,8 @@ func NewApplication() *Application {
 	return &Application{
 		UserHandler:     userHandler,
 		CategoryHandler: categoryHandler,
+		AuthHandler:     authHandler,
+		UserService:     userService,
 		mongoClient:     client,
 	}
 }

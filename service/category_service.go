@@ -4,6 +4,8 @@ import (
 	"time"
 	"user-management/model"
 	"user-management/repository"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CategoryService interface {
@@ -20,8 +22,8 @@ func NewCategoryService(r repository.CategoryRepository) CategoryService {
 }
 
 func (c *categoryService) SaveCategory(categoryRequest model.CategoryRequest) (bool, error) {
-	categoryRequest.Category.TenantID = categoryRequest.TenantId
-	categoryRequest.Category.CreatedBy = categoryRequest.UserId
+	categoryRequest.Category.TenantID, _ = primitive.ObjectIDFromHex(categoryRequest.TenantId)
+	categoryRequest.Category.CreatedBy, _ = primitive.ObjectIDFromHex(categoryRequest.UserId)
 	categoryRequest.Category.ModifiedDate = time.Now().UTC()
 	categoryRequest.Category.CreatedDate = time.Now().UTC()
 	return c.repo.SaveCategory(categoryRequest.Category)

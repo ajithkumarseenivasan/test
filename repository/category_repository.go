@@ -52,7 +52,7 @@ func (c *categoryRepository) GetCategories(tenantId string, skip int64, limit in
 
 	filter := bson.M{}
 	if tenantId != "" {
-		filter["tenantId"] = tenantId
+		filter["tenantId"], _ = primitive.ObjectIDFromHex(tenantId)
 	}
 
 	total, err := c.categoryCollection.CountDocuments(ctx, filter)

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 	"user-management/app"
+	"user-management/middleware"
 	"user-management/route"
 
 	"github.com/gorilla/mux"
@@ -33,12 +34,22 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 func main() {
 
-	application := app.NewApplication()
+	jwtSecret := "ajith123" // In production, use a secure method to manage secrets
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET is required")
+	}
+
+	application := app.NewApplication(jwtSecret)
 
 	r := mux.NewRouter()
 
-	route.RegisterUserRoutes(r, application.UserHandler)
-	route.RegisterCategoryRoutes(r, application.CategoryHandler)
+	route.RegisterAuthRoutes(r, application.AuthHandler)
+
+	protected := r.NewRoute().Subrouter()
+	protected.Use(middleware.JWTAuthMiddleware(jwtSecret, application.UserService))
+	route.RegisterProtectedAuthRoutes(protected, application.AuthHandler)
+	route.RegisterUserRoutes(protected, application.UserHandler)
+	route.RegisterCategoryRoutes(protected, application.CategoryHandler)
 
 	ser := &http.Server{
 		Addr:    ":8080",
