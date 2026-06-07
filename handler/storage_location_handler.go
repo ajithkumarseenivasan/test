@@ -8,16 +8,16 @@ import (
 	"user-management/service"
 )
 
-type CategoryHandler struct {
-	service service.CategoryService
+type StorageLocationHandler struct {
+	service service.StorageLocationService
 }
 
-func NewCategoryHandler(service service.CategoryService) *CategoryHandler {
-	return &CategoryHandler{service: service}
+func NewStorageLocationHandler(service service.StorageLocationService) *StorageLocationHandler {
+	return &StorageLocationHandler{service: service}
 }
 
-func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
-	var req model.CategoryRequest
+func (h *StorageLocationHandler) SaveLocation(w http.ResponseWriter, r *http.Request) {
+	var req model.StorageLocationRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		json.NewEncoder(w).Encode(
@@ -29,7 +29,7 @@ func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-	// Validate MasterUiRequest fields (provided at top-level via embedding)
+
 	if req.TenantId == "" || req.UserId == "" {
 		json.NewEncoder(w).Encode(
 			model.MasterUiResponse{
@@ -40,7 +40,8 @@ func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-	resp, err := h.service.SaveCategory(req)
+
+	resp, err := h.service.SaveLocation(req)
 	if err != nil {
 		json.NewEncoder(w).Encode(
 			model.MasterUiResponse{
@@ -61,7 +62,7 @@ func (h *CategoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func (h *CategoryHandler) GetCategories(w http.ResponseWriter, r *http.Request) {
+func (h *StorageLocationHandler) GetLocations(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	page, err := strconv.ParseInt(query.Get("page"), 10, 64)
 	if err != nil || page < 1 {
@@ -75,7 +76,7 @@ func (h *CategoryHandler) GetCategories(w http.ResponseWriter, r *http.Request) 
 	name := query.Get("name")
 	description := query.Get("description")
 
-	categories, total, err := h.service.GetCategories(tenantId, name, description, page, limit)
+	locations, total, err := h.service.GetLocations(tenantId, name, description, page, limit)
 	if err != nil {
 		json.NewEncoder(w).Encode(
 			model.MasterUiResponse{
@@ -90,11 +91,11 @@ func (h *CategoryHandler) GetCategories(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(
 		model.MasterUiResponse{
 			Status: true,
-			Content: model.CategoryListResponse{
-				Categories: categories,
-				Page:       page,
-				Limit:      limit,
-				Total:      total,
+			Content: model.StorageLocationListResponse{
+				Locations: locations,
+				Page:      page,
+				Limit:     limit,
+				Total:     total,
 			},
 			Message: model.Success,
 		},

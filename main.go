@@ -50,6 +50,7 @@ func main() {
 	route.RegisterProtectedAuthRoutes(protected, application.AuthHandler)
 	route.RegisterUserRoutes(protected, application.UserHandler)
 	route.RegisterCategoryRoutes(protected, application.CategoryHandler)
+	route.RegisterStorageRoutes(protected, application.StorageHandler)
 
 	ser := &http.Server{
 		Addr:    ":8080",

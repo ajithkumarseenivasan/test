@@ -13,7 +13,7 @@ import (
 
 type CategoryRepository interface {
 	SaveCategory(category model.Category) (bool, error)
-	GetCategories(tenantId string, skip int64, limit int64) ([]model.Category, int64, error)
+	GetCategories(tenantId string, name string, description string, skip int64, limit int64) ([]model.Category, int64, error)
 }
 
 type categoryRepository struct {
@@ -46,13 +46,20 @@ func (c *categoryRepository) SaveCategory(category model.Category) (bool, error)
 	return true, nil
 }
 
-func (c *categoryRepository) GetCategories(tenantId string, skip int64, limit int64) ([]model.Category, int64, error) {
+func (c *categoryRepository) GetCategories(tenantId string, name string, description string, skip int64, limit int64) ([]model.Category, int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	filter := bson.M{}
 	if tenantId != "" {
 		filter["tenantId"], _ = primitive.ObjectIDFromHex(tenantId)
+	}
+
+	if name != "" {
+		filter["name"] = bson.M{"$regex": name, "$options": "i"}
+	}
+	if description != "" {
+		filter["description"] = bson.M{"$regex": description, "$options": "i"}
 	}
 
 	total, err := c.categoryCollection.CountDocuments(ctx, filter)

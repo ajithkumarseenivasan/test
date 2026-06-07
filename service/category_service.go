@@ -10,7 +10,7 @@ import (
 
 type CategoryService interface {
 	SaveCategory(categoryRequest model.CategoryRequest) (bool, error)
-	GetCategories(tenantId string, page int64, limit int64) ([]model.Category, int64, error)
+	GetCategories(tenantId string, name string, description string, page int64, limit int64) ([]model.Category, int64, error)
 }
 
 type categoryService struct {
@@ -29,7 +29,7 @@ func (c *categoryService) SaveCategory(categoryRequest model.CategoryRequest) (b
 	return c.repo.SaveCategory(categoryRequest.Category)
 }
 
-func (c *categoryService) GetCategories(tenantId string, page int64, limit int64) ([]model.Category, int64, error) {
+func (c *categoryService) GetCategories(tenantId string, name string, description string, page int64, limit int64) ([]model.Category, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -37,5 +37,5 @@ func (c *categoryService) GetCategories(tenantId string, page int64, limit int64
 		limit = 10
 	}
 	skip := (page - 1) * limit
-	return c.repo.GetCategories(tenantId, skip, limit)
+	return c.repo.GetCategories(tenantId, name, description, skip, limit)
 }

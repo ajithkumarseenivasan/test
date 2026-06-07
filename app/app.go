@@ -16,6 +16,7 @@ type Application struct {
 	CategoryHandler *handler.CategoryHandler
 	AuthHandler     *handler.AuthHandler
 	UserService     service.UserService
+	StorageHandler  *handler.StorageLocationHandler
 	mongoClient     *mongo.Client
 }
 
@@ -41,11 +42,16 @@ func NewApplication(jwtSecret string) *Application {
 	categoryService := service.NewCategoryService(categoryRepo)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 
+	storageRepo := repository.NewStorageLocationRepository(client)
+	storageService := service.NewStorageLocationService(storageRepo)
+	storageHandler := handler.NewStorageLocationHandler(storageService)
+
 	return &Application{
 		UserHandler:     userHandler,
 		CategoryHandler: categoryHandler,
 		AuthHandler:     authHandler,
 		UserService:     userService,
+		StorageHandler:  storageHandler,
 		mongoClient:     client,
 	}
 }
