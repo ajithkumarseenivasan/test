@@ -12,12 +12,14 @@ import (
 )
 
 type Application struct {
-	UserHandler     *handler.UserHandler
-	CategoryHandler *handler.CategoryHandler
-	AuthHandler     *handler.AuthHandler
-	UserService     service.UserService
-	StorageHandler  *handler.StorageLocationHandler
-	mongoClient     *mongo.Client
+	UserHandler        *handler.UserHandler
+	CategoryHandler    *handler.CategoryHandler
+	AuthHandler        *handler.AuthHandler
+	UserService        service.UserService
+	StorageHandler     *handler.StorageLocationHandler
+	InPlantUnitHandler *handler.InPlantUnitHandler
+	VendorHandler      *handler.VendorHandler
+	mongoClient        *mongo.Client
 }
 
 func NewApplication(jwtSecret string) *Application {
@@ -46,12 +48,22 @@ func NewApplication(jwtSecret string) *Application {
 	storageService := service.NewStorageLocationService(storageRepo)
 	storageHandler := handler.NewStorageLocationHandler(storageService)
 
+	inPlantUnitRepo := repository.NewInPlantUnitRepository(client)
+	inPlantUnitService := service.NewInPlantUnitService(inPlantUnitRepo)
+	inPlantUnitHandler := handler.NewInPlantUnitHandler(inPlantUnitService)
+
+	vendorRepo := repository.NewVendorRepository(client)
+	vendorService := service.NewVendorService(vendorRepo)
+	vendorHandler := handler.NewVendorHandler(vendorService)
+
 	return &Application{
-		UserHandler:     userHandler,
-		CategoryHandler: categoryHandler,
-		AuthHandler:     authHandler,
-		UserService:     userService,
-		StorageHandler:  storageHandler,
-		mongoClient:     client,
+		UserHandler:        userHandler,
+		CategoryHandler:    categoryHandler,
+		AuthHandler:        authHandler,
+		UserService:        userService,
+		StorageHandler:     storageHandler,
+		InPlantUnitHandler: inPlantUnitHandler,
+		VendorHandler:      vendorHandler,
+		mongoClient:        client,
 	}
 }
