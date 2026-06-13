@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 	"user-management/model"
 
@@ -29,6 +30,19 @@ func (s *storageLocationRepository) SaveLocation(location model.StorageLocation)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Check for duplicate name within the same tenant
+	filter := bson.M{
+		"name":     location.Name,
+		"tenantId": location.TenantID,
+	}
+	count, err := s.locationCollection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, errors.New("Storage Location with the same name already exists.")
+	}
+
 	if location.ID.IsZero() {
 		location.ID = primitive.NewObjectID()
 	}
@@ -37,7 +51,7 @@ func (s *storageLocationRepository) SaveLocation(location model.StorageLocation)
 	}
 	location.ModifiedDate = time.Now().UTC()
 
-	_, err := s.locationCollection.InsertOne(ctx, location)
+	_, err = s.locationCollection.InsertOne(ctx, location)
 	if err != nil {
 		return false, err
 	}

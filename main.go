@@ -53,6 +53,8 @@ func main() {
 	route.RegisterStorageRoutes(protected, application.StorageHandler)
 	route.RegisterInPlantUnitRoutes(protected, application.InPlantUnitHandler)
 	route.RegisterVendorRoutes(protected, application.VendorHandler)
+	route.RegisterInventoryItemRoutes(protected, application.InventoryItemHandler)
+	route.RegisterPurchaseOrderRoutes(protected, application.PurchaseOrderHandler)
 
 	ser := &http.Server{
 		Addr:    ":8080",

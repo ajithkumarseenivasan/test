@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 	"user-management/model"
 
@@ -29,6 +30,19 @@ func (i *inPlantUnitRepository) SaveInPlantUnit(inPlantUnit model.InPlantUnit) (
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Check for duplicate name within the same tenant
+	filter := bson.M{
+		"name":     inPlantUnit.Name,
+		"tenantId": inPlantUnit.TenantID,
+	}
+	count, err := i.inPlantUnitCollection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, errors.New("In-Plant Unit with the same name already exists.")
+	}
+
 	if inPlantUnit.ID.IsZero() {
 		inPlantUnit.ID = primitive.NewObjectID()
 	}
@@ -38,7 +52,7 @@ func (i *inPlantUnitRepository) SaveInPlantUnit(inPlantUnit model.InPlantUnit) (
 	}
 	inPlantUnit.ModifiedDate = time.Now().UTC()
 
-	_, err := i.inPlantUnitCollection.InsertOne(ctx, inPlantUnit)
+	_, err = i.inPlantUnitCollection.InsertOne(ctx, inPlantUnit)
 	if err != nil {
 		return false, err
 	}

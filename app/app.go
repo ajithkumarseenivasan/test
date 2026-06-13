@@ -12,14 +12,16 @@ import (
 )
 
 type Application struct {
-	UserHandler        *handler.UserHandler
-	CategoryHandler    *handler.CategoryHandler
-	AuthHandler        *handler.AuthHandler
-	UserService        service.UserService
-	StorageHandler     *handler.StorageLocationHandler
-	InPlantUnitHandler *handler.InPlantUnitHandler
-	VendorHandler      *handler.VendorHandler
-	mongoClient        *mongo.Client
+	UserHandler          *handler.UserHandler
+	CategoryHandler      *handler.CategoryHandler
+	AuthHandler          *handler.AuthHandler
+	UserService          service.UserService
+	StorageHandler       *handler.StorageLocationHandler
+	InPlantUnitHandler   *handler.InPlantUnitHandler
+	VendorHandler        *handler.VendorHandler
+	InventoryItemHandler *handler.InventoryItemHandler
+	PurchaseOrderHandler *handler.PurchaseOrderHandler
+	mongoClient          *mongo.Client
 }
 
 func NewApplication(jwtSecret string) *Application {
@@ -56,14 +58,24 @@ func NewApplication(jwtSecret string) *Application {
 	vendorService := service.NewVendorService(vendorRepo)
 	vendorHandler := handler.NewVendorHandler(vendorService)
 
+	inventoryItemRepo := repository.NewInventoryItemRepository(client)
+	inventoryItemService := service.NewInventoryItemService(inventoryItemRepo)
+	inventoryItemHandler := handler.NewInventoryItemHandler(inventoryItemService)
+
+	purchaseOrderRepo := repository.NewPurchaseOrderRepository(client)
+	purchaseOrderService := service.NewPurchaseOrderService(purchaseOrderRepo)
+	purchaseOrderHandler := handler.NewPurchaseOrderHandler(purchaseOrderService)
+
 	return &Application{
-		UserHandler:        userHandler,
-		CategoryHandler:    categoryHandler,
-		AuthHandler:        authHandler,
-		UserService:        userService,
-		StorageHandler:     storageHandler,
-		InPlantUnitHandler: inPlantUnitHandler,
-		VendorHandler:      vendorHandler,
-		mongoClient:        client,
+		UserHandler:          userHandler,
+		CategoryHandler:      categoryHandler,
+		AuthHandler:          authHandler,
+		UserService:          userService,
+		StorageHandler:       storageHandler,
+		InPlantUnitHandler:   inPlantUnitHandler,
+		VendorHandler:        vendorHandler,
+		InventoryItemHandler: inventoryItemHandler,
+		PurchaseOrderHandler: purchaseOrderHandler,
+		mongoClient:          client,
 	}
 }

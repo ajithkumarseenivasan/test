@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 	"user-management/model"
 
@@ -29,6 +30,19 @@ func (c *categoryRepository) SaveCategory(category model.Category) (bool, error)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Check for duplicate name within the same tenant
+	filter := bson.M{
+		"name":     category.Name,
+		"tenantId": category.TenantID,
+	}
+	count, err := c.categoryCollection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, errors.New("Category with the same name already exists.")
+	}
+
 	if category.ID.IsZero() {
 		category.ID = primitive.NewObjectID()
 	}
@@ -38,7 +52,7 @@ func (c *categoryRepository) SaveCategory(category model.Category) (bool, error)
 	}
 	category.ModifiedDate = time.Now().UTC()
 
-	_, err := c.categoryCollection.InsertOne(ctx, category)
+	_, err = c.categoryCollection.InsertOne(ctx, category)
 	if err != nil {
 		return false, err
 	}

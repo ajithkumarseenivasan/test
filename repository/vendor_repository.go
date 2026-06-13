@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 	"user-management/model"
 
@@ -29,6 +30,19 @@ func (s *vendorRepository) SaveVendor(vendor model.Vendor) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Check for duplicate name within the same tenant
+	filter := bson.M{
+		"name":     vendor.Name,
+		"tenantId": vendor.TenantID,
+	}
+	count, err := s.vendorCollection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, errors.New("Vendor with the same name already exists.")
+	}
+
 	if vendor.ID.IsZero() {
 		vendor.ID = primitive.NewObjectID()
 	}
@@ -37,7 +51,7 @@ func (s *vendorRepository) SaveVendor(vendor model.Vendor) (bool, error) {
 	}
 	vendor.ModifiedDate = time.Now().UTC()
 
-	_, err := s.vendorCollection.InsertOne(ctx, vendor)
+	_, err = s.vendorCollection.InsertOne(ctx, vendor)
 	if err != nil {
 		return false, err
 	}
